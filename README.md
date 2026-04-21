@@ -24,7 +24,7 @@ PayorLens bridges the gap between raw evaluation metrics and the business conseq
 
 **Overall governance verdict: RED — DO NOT DEPLOY without remediation.**
 
-📄 [View full sample report →](reports/payorlens_logistic.html)
+📄 [View full sample report →](reports/sample-report.html)
 
 ---
 
