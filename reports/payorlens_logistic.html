@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayorLens AI Governance Report — logistic</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:Arial,sans-serif; color:#111827; margin:0; padding:0; background:#F4F6F8; }
+  .page { max-width:960px; margin:0 auto; padding:32px 24px; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#0D1F3C; color:white; padding:10px; text-align:left; font-size:12px; }
+  td { padding:8px 10px; font-size:12px; vertical-align:top; }
+  tr:nth-child(even) { background:#F8F9FA; }
+  .section-box { background:white; border-radius:8px; padding:24px; margin:20px 0;
+                  box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  @media print { body { background:white; } .page { padding:16px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <div style="background:#0D1F3C;color:white;padding:28px 32px;border-radius:8px 8px 0 0;">
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.5px;">PAYORLENS</div>
+    <div style="font-size:14px;color:#A8D8EA;margin-top:4px;">
+      AI Governance Evaluation Report · Model: logistic · 2026-04-20 17:36
+    </div>
+    <div style="font-size:12px;color:#6B9DBA;margin-top:6px;">
+      Dataset: CMS DE-SynPUF Inpatient Claims · Architecture v2.0 ·
+      NIST AI RMF aligned
+    </div>
+  </div>
+
+  <!-- ═══════════════ SECTION 0: EXECUTIVE RISK BRIEF ═══════════════ -->
+  <div class="section-box" style="border-top:6px solid #B03A2E;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;">
+          Section 0 · Executive Risk Brief
+        </div>
+        <h1 style="font-size:22px;margin:8px 0;color:#0D1F3C;">
+          Overall Governance Risk Assessment
+        </h1>
+      </div>
+      <div style="background:#FDECEA;border:2px solid #B03A2E;padding:12px 24px;
+                  border-radius:6px;text-align:center;">
+        <div style="font-size:32px;">🔴</div>
+        <div style="font-size:18px;font-weight:700;color:#B03A2E;">RED</div>
+        <div style="font-size:11px;color:#6B7280;">Risk Level</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0;">
+      
+    <div style="background:white;border-top:4px solid #0D1F3C;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Total Findings</div>
+        <div style="font-size:28px;font-weight:700;color:#0D1F3C;">11</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">All risk levels</div>
+    </div>
+      
+    <div style="background:white;border-top:4px solid #B03A2E;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Critical</div>
+        <div style="font-size:28px;font-weight:700;color:#B03A2E;">4</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Require immediate action</div>
+    </div>
+      
+    <div style="background:white;border-top:4px solid #E67E22;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">High</div>
+        <div style="font-size:28px;font-weight:700;color:#E67E22;">0</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Require remediation</div>
+    </div>
+      
+    <div style="background:white;border-top:4px solid #1E7A4A;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Medium / Low</div>
+        <div style="font-size:28px;font-weight:700;color:#1E7A4A;">3 / 4</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Monitor</div>
+    </div>
+    </div>
+
+    <div style="background:#FDECEA;border:1px solid #B03A2E;padding:14px 18px;
+                border-radius:6px;margin:16px 0;">
+      <strong style="color:#B03A2E;">Recommendation:</strong>
+      <span style="font-size:13px;"> DO NOT DEPLOY. 4 critical finding(s) must be remediated before this model is used in any coverage decision workflow.</span>
+    </div>
+
+    <div style="margin-top:16px;">
+      <strong style="font-size:13px;color:#0D1F3C;">Top Findings:</strong>
+      <div style="background:#F4F6F8;border-left:4px solid #B03A2E;padding:10px 14px;margin:8px 0;border-radius:0 4px 4px 0;font-size:13px;"><strong>Finding 1:</strong> Severely miscalibrated model (Brier=0.236). Confidence scores are unreliable. Autonomous use in coverage decisions is unjustifiable under CMS-0057-F explainability requirements.…</div><div style="background:#F4F6F8;border-left:4px solid #B03A2E;padding:10px 14px;margin:8px 0;border-radius:0 4px 4px 0;font-size:13px;"><strong>Finding 2:</strong> Severe denial rate disparity (DPD=0.286) across race cohorts (p=0.0000). This surpasses the NAIC Adverse Impact Ratio threshold implication (0.80–1.25 bounds). A payer using this model in prior auth o…</div><div style="background:#F4F6F8;border-left:4px solid #B03A2E;padding:10px 14px;margin:8px 0;border-radius:0 4px 4px 0;font-size:13px;"><strong>Finding 3:</strong> Severe denial rate disparity (DPD=0.446) across age_band cohorts (p=0.0000). This surpasses the NAIC Adverse Impact Ratio threshold implication (0.80–1.25 bounds). A payer using this model in prior au…</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SECTION 1: NIST AI RMF MAP ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#0D1F3C;font-size:18px;
+               border-bottom:3px solid #0D1F3C;padding-bottom:6px;margin-top:36px;">Section 1 · NIST AI RMF Compliance Mapping</h2>
+    <p style="font-size:13px;color:#374151;">
+      Every evaluated metric is mapped to its corresponding NIST AI RMF function
+      and subcategory. This table is the regulatory spine of the report.
+    </p>
+    <table>
+      <thead><tr>
+        <th>Metric</th><th>NIST Function</th><th>Subcategory</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Data Quality (Validation Error Rate)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#E6F4F9;
+                   color:#0A7EA4;border:1px solid #0A7EA4;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Map
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MP-2.3
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Calibration (Brier Score + High-Conf Errors)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.3
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">DPD (race)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.5
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">DPD (gender)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.5
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">DPD (age_band)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.5
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">DPD (state_code)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.5
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Robustness — ICD9 primary diagnosis code corrupted (wrong/invalid code injected)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.6
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Robustness — Prior auth required fields nulled (diagnosis + utilization days)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.6
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Robustness — Age band shifted up one tier (member enrollment data lag)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.6
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Robustness — Claim amounts 10x-inflated on 5% of records (high-cost outliers)</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.6
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+    </tr>
+    <tr style="border-bottom:1px solid #DDE1E7;">
+        <td style="padding:8px 10px;font-size:12px;">Robustness — Combined: 15% missing diagnosis + 15% amount corrupted + 5% age shift</td>
+        <td style="padding:8px 10px;">
+            <span style="background:#FDF6E3;
+                   color:#C8932A;border:1px solid #C8932A;
+                   padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;">
+                Measure
+            </span>
+        </td>
+        <td style="padding:8px 10px;font-size:11px;color:#374151;">
+            MS-2.6
+        </td>
+        <td style="padding:8px 10px;"><span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span></td>
+    </tr></tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════ SECTION 2: DATA QUALITY ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#0A7EA4;font-size:18px;
+               border-bottom:3px solid #0A7EA4;padding-bottom:6px;margin-top:36px;">Section 2 · Data Quality Findings</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0;">
+      
+    <div style="background:white;border-top:4px solid #0A7EA4;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Total Records</div>
+        <div style="font-size:28px;font-weight:700;color:#0A7EA4;">66,718</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">After merge & normalisation</div>
+    </div>
+      
+    <div style="background:white;border-top:4px solid #B03A2E;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Validation Errors</div>
+        <div style="font-size:28px;font-weight:700;color:#B03A2E;">0</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Pydantic schema failures</div>
+    </div>
+      
+    <div style="background:white;border-top:4px solid #C8932A;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Error Rate</div>
+        <div style="font-size:28px;font-weight:700;color:#C8932A;">0.00%</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Schema compliance rate</div>
+    </div>
+    </div>
+    <p style="font-size:13px;color:#374151;">
+      Data contract enforced via Pydantic v2 schema validation. Each record validated against
+      ClaimRecord model with field-level type coercion and range checks.
+      <strong>Note on CMS DE-SynPUF:</strong> SP_STATE_CODE and CLM_ID are integer-typed in
+      raw CMS files — coerced to str in normalisation layer before schema validation.
+    </p>
+  </div>
+
+  <!-- ═══════════════ SECTION 3: MODEL PERFORMANCE ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#0A7EA4;font-size:18px;
+               border-bottom:3px solid #0A7EA4;padding-bottom:6px;margin-top:36px;">Section 3 · Model Performance Overview</h2>
+    
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0;">
+                
+    <div style="background:white;border-top:4px solid #0A7EA4;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Accuracy</div>
+        <div style="font-size:28px;font-weight:700;color:#0A7EA4;">0.586</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Overall correctness</div>
+    </div>
+                
+    <div style="background:white;border-top:4px solid #0D1F3C;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">F1 Score</div>
+        <div style="font-size:28px;font-weight:700;color:#0D1F3C;">0.379</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Precision-Recall balance</div>
+    </div>
+                
+    <div style="background:white;border-top:4px solid #1E7A4A;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">ROC-AUC</div>
+        <div style="font-size:28px;font-weight:700;color:#1E7A4A;">0.632</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Discrimination ability</div>
+    </div>
+                
+    <div style="background:white;border-top:4px solid #C8932A;border-radius:6px;
+                padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+        <div style="font-size:12px;color:#6B7280;text-transform:uppercase;
+                    letter-spacing:.05em;margin-bottom:6px;">Brier Score</div>
+        <div style="font-size:28px;font-weight:700;color:#C8932A;">0.236</div>
+        <div style="font-size:12px;color:#6B7280;margin-top:4px;">Calibration quality</div>
+    </div>
+            </div>
+    <p style="font-size:12px;color:#6B7280;margin-top:12px;">
+      High-confidence errors (>85% confidence, wrong prediction):
+      <strong>8</strong>
+      (0.05% of test set).
+      These are the 'dangerous prediction' events — model was highly confident AND wrong.
+      In prior auth workflows, these become automated adverse determinations without human review.
+    </p>
+  </div>
+
+  <!-- ═══════════════ SECTION 4–5: FAIRNESS + RISK FINDINGS ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#C8932A;font-size:18px;
+               border-bottom:3px solid #C8932A;padding-bottom:6px;margin-top:36px;">Section 4–5 · Fairness Audit & Risk Findings</h2>
+    
+    <div style="border-left:5px solid #1E7A4A;background:#E8F8EE;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Data Quality (Validation Error Rate)
+            </strong>
+            <span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Data validation error rate of 0.00% — excellent. Pydantic schema enforcement is effective on this dataset.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Maintain current data contract. Re-validate on any schema change.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Map</strong>
+            › MP-2.3 — Data provenance, quality, and lineage
+            &nbsp;|&nbsp; Total records evaluated: 66,718
+        </div>
+    </div>
+    <div style="border-left:5px solid #B03A2E;background:#FDECEA;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Calibration (Brier Score + High-Conf Errors)
+            </strong>
+            <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Severely miscalibrated model (Brier=0.236). Confidence scores are unreliable. Autonomous use in coverage decisions is unjustifiable under CMS-0057-F explainability requirements.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Do not use model confidence for routing logic. Full recalibration required.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.3 — AI output reliability and uncertainty quantification
+            &nbsp;|&nbsp; High-confidence errors (>85% conf, wrong): 8/16680
+        </div>
+    </div>
+    <div style="border-left:5px solid #B03A2E;background:#FDECEA;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                DPD (race)
+            </strong>
+            <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Severe denial rate disparity (DPD=0.286) across race cohorts (p=0.0000). This surpasses the NAIC Adverse Impact Ratio threshold implication (0.80–1.25 bounds). A payer using this model in prior auth or claims adjudication faces litigation exposure comparable to the UnitedHealth nH Predict and Cigna PxDx class-action pattern.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Do NOT deploy in production. Full model audit required. Independent third-party re-validation recommended before any live use.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.5 — Bias and fairness testing across demographic cohorts
+            &nbsp;|&nbsp; chi-square p-value=0.0000, significant=True
+        </div>
+    </div>
+    <div style="border-left:5px solid #C8932A;background:#FDF6E3;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                DPD (gender)
+            </strong>
+            <span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Meaningful denial rate disparity (0.054) across gender cohorts (p=0.0000). Under NIST AI RMF MS-2.5, this constitutes a measurable fairness gap. In a prior auth workflow, this pattern would attract NAIC unfair discrimination scrutiny and requires documented mitigation.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Investigate root cause in training data. Rebalance cohort representation or apply post-processing fairness constraint. Document remediation steps.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.5 — Bias and fairness testing across demographic cohorts
+            &nbsp;|&nbsp; chi-square p-value=0.0000, significant=True
+        </div>
+    </div>
+    <div style="border-left:5px solid #B03A2E;background:#FDECEA;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                DPD (age_band)
+            </strong>
+            <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Severe denial rate disparity (DPD=0.446) across age_band cohorts (p=0.0000). This surpasses the NAIC Adverse Impact Ratio threshold implication (0.80–1.25 bounds). A payer using this model in prior auth or claims adjudication faces litigation exposure comparable to the UnitedHealth nH Predict and Cigna PxDx class-action pattern.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Do NOT deploy in production. Full model audit required. Independent third-party re-validation recommended before any live use.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.5 — Bias and fairness testing across demographic cohorts
+            &nbsp;|&nbsp; chi-square p-value=0.0000, significant=True
+        </div>
+    </div>
+    <div style="border-left:5px solid #B03A2E;background:#FDECEA;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                DPD (state_code)
+            </strong>
+            <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Severe denial rate disparity (DPD=0.550) across state_code cohorts (p=0.0000). This surpasses the NAIC Adverse Impact Ratio threshold implication (0.80–1.25 bounds). A payer using this model in prior auth or claims adjudication faces litigation exposure comparable to the UnitedHealth nH Predict and Cigna PxDx class-action pattern.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Do NOT deploy in production. Full model audit required. Independent third-party re-validation recommended before any live use.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.5 — Bias and fairness testing across demographic cohorts
+            &nbsp;|&nbsp; chi-square p-value=0.0000, significant=True
+        </div>
+    </div>
+    <div style="border-left:5px solid #C8932A;background:#FDF6E3;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Robustness — ICD9 primary diagnosis code corrupted (wrong/invalid code injected)
+            </strong>
+            <span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Moderate F1 degradation (7.7%) under 'ICD9 primary diagnosis code corrupted (wrong/invalid code injected)' at 20% corruption. Crosses warning threshold (>5%). In real payer workflows, data quality issues at this rate are common (incomplete PA submissions, missing documentation). Performance will degrade in production without pipeline quality controls.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Implement upstream data validation. Add fallback to human review when key fields are missing.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.6 — Robustness and resilience under input perturbation
+            &nbsp;|&nbsp; Baseline F1=0.379 → Degraded F1=0.349 (decay=7.7%) | Warning >5% | Danger >20%
+        </div>
+    </div>
+    <div style="border-left:5px solid #1E7A4A;background:#E8F8EE;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Robustness — Prior auth required fields nulled (diagnosis + utilization days)
+            </strong>
+            <span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Model shows negligible performance degradation (1.6% F1 decay) under 'Prior auth required fields nulled (diagnosis + utilization days)' at 20% corruption rate. Robust to this failure mode under NIST AI RMF MS-2.6.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> No action required. Document robustness test result for governance trail.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.6 — Robustness and resilience under input perturbation
+            &nbsp;|&nbsp; Baseline F1=0.379 → Degraded F1=0.373 (decay=1.6%) | Warning >5% | Danger >20%
+        </div>
+    </div>
+    <div style="border-left:5px solid #1E7A4A;background:#E8F8EE;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Robustness — Age band shifted up one tier (member enrollment data lag)
+            </strong>
+            <span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Model shows negligible performance degradation (0.0% F1 decay) under 'Age band shifted up one tier (member enrollment data lag)' at 10% corruption rate. Robust to this failure mode under NIST AI RMF MS-2.6.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> No action required. Document robustness test result for governance trail.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.6 — Robustness and resilience under input perturbation
+            &nbsp;|&nbsp; Baseline F1=0.379 → Degraded F1=0.379 (decay=0.0%) | Warning >5% | Danger >20%
+        </div>
+    </div>
+    <div style="border-left:5px solid #1E7A4A;background:#E8F8EE;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Robustness — Claim amounts 10x-inflated on 5% of records (high-cost outliers)
+            </strong>
+            <span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Model shows negligible performance degradation (1.4% F1 decay) under 'Claim amounts 10x-inflated on 5% of records (high-cost outliers)' at 5% corruption rate. Robust to this failure mode under NIST AI RMF MS-2.6.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> No action required. Document robustness test result for governance trail.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.6 — Robustness and resilience under input perturbation
+            &nbsp;|&nbsp; Baseline F1=0.379 → Degraded F1=0.374 (decay=1.4%) | Warning >5% | Danger >20%
+        </div>
+    </div>
+    <div style="border-left:5px solid #C8932A;background:#FDF6E3;padding:14px 18px;
+                margin:12px 0;border-radius:0 6px 6px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;color:#0D1F3C;">
+                Robustness — Combined: 15% missing diagnosis + 15% amount corrupted + 5% age shift
+            </strong>
+            <span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span>
+        </div>
+        <div style="margin:8px 0;font-size:13px;color:#1F2937;">
+            Moderate F1 degradation (6.5%) under 'Combined: 15% missing diagnosis + 15% amount corrupted + 5% age shift' at 15% corruption. Crosses warning threshold (>5%). In real payer workflows, data quality issues at this rate are common (incomplete PA submissions, missing documentation). Performance will degrade in production without pipeline quality controls.
+        </div>
+        <div style="font-size:12px;color:#374151;background:rgba(0,0,0,.04);
+                    padding:6px 10px;border-radius:4px;margin-top:6px;">
+            <strong>Recommended Action:</strong> Implement upstream data validation. Add fallback to human review when key fields are missing.
+        </div>
+        <div style="font-size:11px;color:#6B7280;margin-top:6px;">
+            NIST AI RMF: <strong>Measure</strong>
+            › MS-2.6 — Robustness and resilience under input perturbation
+            &nbsp;|&nbsp; Baseline F1=0.379 → Degraded F1=0.354 (decay=6.5%) | Warning >5% | Danger >20%
+        </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FAIRNESS COHORT DETAIL ═══════════════ -->
+  
+            <div class="section-box" style="border-left:5px solid #B03A2E;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:15px;color:#0D1F3C;margin:0;">
+                  Fairness — Race
+                </h3>
+                <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+              </div>
+              <div style="font-size:12px;color:#374151;margin:8px 0;">
+                DPD=0.2861 &nbsp;|&nbsp; EOD=0.2202 &nbsp;|&nbsp;
+                χ² p=0.0000 &nbsp;|&nbsp; ✅ Significant
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Cohort</th><th>Count</th><th>Denial Rate</th>
+                  <th>F1</th><th>Note</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td>White</td>
+                  <td>14,065</td>
+                  <td>0.423</td>
+                  <td>0.369</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>Black</td>
+                  <td>1,797</td>
+                  <td>0.701</td>
+                  <td>0.431</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>Hispanic</td>
+                  <td>321</td>
+                  <td>0.611</td>
+                  <td>0.339</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>Other</td>
+                  <td>497</td>
+                  <td>0.414</td>
+                  <td>0.408</td>
+                  <td>—</td>
+                </tr></tbody>
+              </table>
+            </div>
+            <div class="section-box" style="border-left:5px solid #C8932A;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:15px;color:#0D1F3C;margin:0;">
+                  Fairness — Gender
+                </h3>
+                <span style="background:#FDF6E3;color:#C8932A;border:1px solid #C8932A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟡 MEDIUM</span>
+              </div>
+              <div style="font-size:12px;color:#374151;margin:8px 0;">
+                DPD=0.0539 &nbsp;|&nbsp; EOD=0.0546 &nbsp;|&nbsp;
+                χ² p=0.0000 &nbsp;|&nbsp; ✅ Significant
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Cohort</th><th>Count</th><th>Denial Rate</th>
+                  <th>F1</th><th>Note</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td>Female</td>
+                  <td>9,425</td>
+                  <td>0.480</td>
+                  <td>0.382</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>Male</td>
+                  <td>7,255</td>
+                  <td>0.426</td>
+                  <td>0.375</td>
+                  <td>—</td>
+                </tr></tbody>
+              </table>
+            </div>
+            <div class="section-box" style="border-left:5px solid #B03A2E;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:15px;color:#0D1F3C;margin:0;">
+                  Fairness — Age Band
+                </h3>
+                <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+              </div>
+              <div style="font-size:12px;color:#374151;margin:8px 0;">
+                DPD=0.4459 &nbsp;|&nbsp; EOD=0.3814 &nbsp;|&nbsp;
+                χ² p=0.0000 &nbsp;|&nbsp; ✅ Significant
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Cohort</th><th>Count</th><th>Denial Rate</th>
+                  <th>F1</th><th>Note</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td>65+</td>
+                  <td>13,898</td>
+                  <td>0.412</td>
+                  <td>0.357</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>50-64</td>
+                  <td>1,773</td>
+                  <td>0.595</td>
+                  <td>0.418</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>35-49</td>
+                  <td>776</td>
+                  <td>0.812</td>
+                  <td>0.490</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>18-34</td>
+                  <td>233</td>
+                  <td>0.858</td>
+                  <td>0.493</td>
+                  <td>—</td>
+                </tr></tbody>
+              </table>
+            </div>
+            <div class="section-box" style="border-left:5px solid #B03A2E;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3 style="font-size:15px;color:#0D1F3C;margin:0;">
+                  Fairness — State Code
+                </h3>
+                <span style="background:#FDECEA;color:#B03A2E;border:1px solid #B03A2E;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🔴 CRITICAL</span>
+              </div>
+              <div style="font-size:12px;color:#374151;margin:8px 0;">
+                DPD=0.5505 &nbsp;|&nbsp; EOD=0.8182 &nbsp;|&nbsp;
+                χ² p=0.0000 &nbsp;|&nbsp; ✅ Significant
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Cohort</th><th>Count</th><th>Denial Rate</th>
+                  <th>F1</th><th>Note</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td>AR</td>
+                  <td>209</td>
+                  <td>0.445</td>
+                  <td>0.308</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>CA</td>
+                  <td>1,277</td>
+                  <td>0.435</td>
+                  <td>0.389</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>WV</td>
+                  <td>431</td>
+                  <td>0.390</td>
+                  <td>0.320</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NJ</td>
+                  <td>559</td>
+                  <td>0.599</td>
+                  <td>0.383</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>KS</td>
+                  <td>202</td>
+                  <td>0.386</td>
+                  <td>0.351</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>FL</td>
+                  <td>1,176</td>
+                  <td>0.495</td>
+                  <td>0.356</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>OH</td>
+                  <td>718</td>
+                  <td>0.421</td>
+                  <td>0.364</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>AL</td>
+                  <td>335</td>
+                  <td>0.460</td>
+                  <td>0.364</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>UT</td>
+                  <td>1,193</td>
+                  <td>0.455</td>
+                  <td>0.366</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>IN</td>
+                  <td>415</td>
+                  <td>0.439</td>
+                  <td>0.373</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NC</td>
+                  <td>534</td>
+                  <td>0.511</td>
+                  <td>0.399</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NY</td>
+                  <td>1,044</td>
+                  <td>0.485</td>
+                  <td>0.367</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>TX</td>
+                  <td>364</td>
+                  <td>0.527</td>
+                  <td>0.413</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MO</td>
+                  <td>427</td>
+                  <td>0.473</td>
+                  <td>0.377</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>ME</td>
+                  <td>75</td>
+                  <td>0.240</td>
+                  <td>0.167</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>WI</td>
+                  <td>263</td>
+                  <td>0.365</td>
+                  <td>0.371</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>IL</td>
+                  <td>756</td>
+                  <td>0.468</td>
+                  <td>0.405</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MS</td>
+                  <td>251</td>
+                  <td>0.514</td>
+                  <td>0.373</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>SD</td>
+                  <td>304</td>
+                  <td>0.493</td>
+                  <td>0.381</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>OR</td>
+                  <td>131</td>
+                  <td>0.298</td>
+                  <td>0.355</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>PR</td>
+                  <td>346</td>
+                  <td>0.312</td>
+                  <td>0.429</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>ID</td>
+                  <td>73</td>
+                  <td>0.233</td>
+                  <td>0.167</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>WY</td>
+                  <td>152</td>
+                  <td>0.382</td>
+                  <td>0.268</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>OK</td>
+                  <td>258</td>
+                  <td>0.357</td>
+                  <td>0.317</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>LA</td>
+                  <td>293</td>
+                  <td>0.495</td>
+                  <td>0.415</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MI</td>
+                  <td>601</td>
+                  <td>0.464</td>
+                  <td>0.347</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>GA</td>
+                  <td>494</td>
+                  <td>0.549</td>
+                  <td>0.395</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>KY</td>
+                  <td>332</td>
+                  <td>0.503</td>
+                  <td>0.496</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MA</td>
+                  <td>382</td>
+                  <td>0.503</td>
+                  <td>0.443</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>VT</td>
+                  <td>67</td>
+                  <td>0.388</td>
+                  <td>0.439</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>AZ</td>
+                  <td>264</td>
+                  <td>0.409</td>
+                  <td>0.364</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>ND</td>
+                  <td>33</td>
+                  <td>0.061</td>
+                  <td>0.000</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MD</td>
+                  <td>327</td>
+                  <td>0.578</td>
+                  <td>0.424</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>Unknown</td>
+                  <td>144</td>
+                  <td>0.500</td>
+                  <td>0.255</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NV</td>
+                  <td>99</td>
+                  <td>0.545</td>
+                  <td>0.447</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>PA</td>
+                  <td>682</td>
+                  <td>0.520</td>
+                  <td>0.415</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>CT</td>
+                  <td>196</td>
+                  <td>0.378</td>
+                  <td>0.262</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MN</td>
+                  <td>258</td>
+                  <td>0.314</td>
+                  <td>0.351</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>CO</td>
+                  <td>184</td>
+                  <td>0.451</td>
+                  <td>0.409</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>IA</td>
+                  <td>196</td>
+                  <td>0.291</td>
+                  <td>0.409</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>TN</td>
+                  <td>51</td>
+                  <td>0.157</td>
+                  <td>0.300</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>DE</td>
+                  <td>59</td>
+                  <td>0.542</td>
+                  <td>0.273</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>AK</td>
+                  <td>20</td>
+                  <td>0.350</td>
+                  <td>0.500</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NE</td>
+                  <td>94</td>
+                  <td>0.553</td>
+                  <td>0.343</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NH</td>
+                  <td>79</td>
+                  <td>0.570</td>
+                  <td>0.394</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>NM</td>
+                  <td>89</td>
+                  <td>0.213</td>
+                  <td>0.129</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>HI</td>
+                  <td>49</td>
+                  <td>0.245</td>
+                  <td>0.480</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>SC</td>
+                  <td>62</td>
+                  <td>0.258</td>
+                  <td>0.323</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>DC</td>
+                  <td>36</td>
+                  <td>0.611</td>
+                  <td>0.545</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>MT</td>
+                  <td>59</td>
+                  <td>0.102</td>
+                  <td>0.429</td>
+                  <td>—</td>
+                </tr><tr>
+                  <td>VA</td>
+                  <td>37</td>
+                  <td>0.432</td>
+                  <td>0.500</td>
+                  <td>—</td>
+                </tr></tbody>
+              </table>
+            </div>
+
+  <!-- ═══════════════ SECTION 6: ROBUSTNESS ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#B03A2E;font-size:18px;
+               border-bottom:3px solid #B03A2E;padding-bottom:6px;margin-top:36px;">Section 6 · Robustness Stress Test — Clinical Failure Scenarios</h2>
+    
+        <p style="font-size:12px;color:#6B7280;">
+          Baseline F1: <strong>0.3787</strong> &nbsp;·&nbsp;
+          🟢 Safe &lt;5% &nbsp;|&nbsp; 🟡 Warning 5–10% &nbsp;|&nbsp;
+          🟠 High 10–20% &nbsp;|&nbsp; 🔴 Danger &gt;20% F1 decay
+        </p>
+        <table>
+          <thead><tr>
+            <th>Scenario</th><th>Rate</th><th>Baseline F1</th>
+            <th>Degraded F1</th><th>Decay %</th><th>Threshold</th><th>Risk</th>
+          </tr></thead>
+          <tbody><tr>
+              <td>ICD9 primary diagnosis code corrupted (wrong/invalid code injected)</td>
+              <td>20%</td>
+              <td>0.379</td>
+              <td>0.349</td>
+              <td><strong>7.7%</strong></td>
+              <td style="white-space:nowrap">✅ OK</td>
+              <td><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+            </tr><tr>
+              <td>Prior auth required fields nulled (diagnosis + utilization days)</td>
+              <td>20%</td>
+              <td>0.379</td>
+              <td>0.373</td>
+              <td><strong>1.6%</strong></td>
+              <td style="white-space:nowrap">✅ OK</td>
+              <td><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+            </tr><tr>
+              <td>Age band shifted up one tier (member enrollment data lag)</td>
+              <td>10%</td>
+              <td>0.379</td>
+              <td>0.379</td>
+              <td><strong>0.0%</strong></td>
+              <td style="white-space:nowrap">✅ OK</td>
+              <td><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+            </tr><tr>
+              <td>Claim amounts 10x-inflated on 5% of records (high-cost outliers)</td>
+              <td>5%</td>
+              <td>0.379</td>
+              <td>0.374</td>
+              <td><strong>1.4%</strong></td>
+              <td style="white-space:nowrap">✅ OK</td>
+              <td><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+            </tr><tr>
+              <td>Combined: 15% missing diagnosis + 15% amount corrupted + 5% age shift</td>
+              <td>15%</td>
+              <td>0.379</td>
+              <td>0.354</td>
+              <td><strong>6.5%</strong></td>
+              <td style="white-space:nowrap">✅ OK</td>
+              <td><span style="background:#E8F8EE;color:#1E7A4A;border:1px solid #1E7A4A;padding:3px 10px;border-radius:4px;font-weight:700;font-size:12px;">🟢 LOW</span></td>
+            </tr></tbody>
+        </table>
+  </div>
+
+  <!-- ═══════════════ SECTION 7: TOP FAILURE CASES ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#B03A2E;font-size:18px;
+               border-bottom:3px solid #B03A2E;padding-bottom:6px;margin-top:36px;">Section 7 · Top 5 High-Confidence Failure Cases</h2>
+    <p style="font-size:12px;color:#6B7280;margin-bottom:12px;">
+      The five predictions where the model was most confident AND wrong.
+      In a prior auth automation workflow these become unreviewed adverse determinations.
+      Each narrative includes patient profile, error type, confidence level,
+      and governance implication.
+    </p>
+    <div style="background:#FEF0E7;border-left:5px solid #B03A2E;padding:14px 18px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;line-height:1.75;"><strong>Rank 1 — False Denial</strong> (model confidence: 92.7%)<br>Patient: Male, age 68, race: Black, state: NC<br>Chronic conditions: Diabetes, Congestive Heart Failure, COPD | Utilization: 97 days<br>Model predicted: <strong>DENIED</strong> · Actual outcome: <strong>APPROVED</strong><br><em>Governance implication: A false denial at 92.7% confidence bypasses human review in an automated prior auth workflow, becoming an unreviewed adverse determination. This patient profile (Black, age 68) represents a demographic group with elevated model error rates per fairness audit.</em></div><div style="background:#FEF0E7;border-left:5px solid #B03A2E;padding:14px 18px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;line-height:1.75;"><strong>Rank 2 — False Denial</strong> (model confidence: 91.1%)<br>Patient: Male, age 72, race: Black, state: GA<br>Chronic conditions: Diabetes, Congestive Heart Failure | Utilization: 79 days<br>Model predicted: <strong>DENIED</strong> · Actual outcome: <strong>APPROVED</strong><br><em>Governance implication: A false denial at 91.1% confidence bypasses human review in an automated prior auth workflow, becoming an unreviewed adverse determination. This patient profile (Black, age 72) represents a demographic group with elevated model error rates per fairness audit.</em></div><div style="background:#FEF0E7;border-left:5px solid #B03A2E;padding:14px 18px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;line-height:1.75;"><strong>Rank 3 — False Denial</strong> (model confidence: 90.7%)<br>Patient: Female, age 79, race: White, state: IL<br>Chronic conditions: Diabetes, Congestive Heart Failure, COPD | Utilization: 90 days<br>Model predicted: <strong>DENIED</strong> · Actual outcome: <strong>APPROVED</strong><br><em>Governance implication: A false denial at 90.7% confidence bypasses human review in an automated prior auth workflow, becoming an unreviewed adverse determination. This patient profile (White, age 79) represents a demographic group with elevated model error rates per fairness audit.</em></div><div style="background:#FEF0E7;border-left:5px solid #B03A2E;padding:14px 18px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;line-height:1.75;"><strong>Rank 4 — False Denial</strong> (model confidence: 87.4%)<br>Patient: Male, age 88, race: White, state: IN<br>Chronic conditions: Diabetes, Congestive Heart Failure, COPD, Cancer | Utilization: 66 days<br>Model predicted: <strong>DENIED</strong> · Actual outcome: <strong>APPROVED</strong><br><em>Governance implication: A false denial at 87.4% confidence bypasses human review in an automated prior auth workflow, becoming an unreviewed adverse determination. This patient profile (White, age 88) represents a demographic group with elevated model error rates per fairness audit.</em></div><div style="background:#FEF0E7;border-left:5px solid #B03A2E;padding:14px 18px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;line-height:1.75;"><strong>Rank 5 — False Denial</strong> (model confidence: 87.4%)<br>Patient: Female, age 46, race: Black, state: NC<br>Chronic conditions: Diabetes, Congestive Heart Failure, COPD | Utilization: 36 days<br>Model predicted: <strong>DENIED</strong> · Actual outcome: <strong>APPROVED</strong><br><em>Governance implication: A false denial at 87.4% confidence bypasses human review in an automated prior auth workflow, becoming an unreviewed adverse determination. This patient profile (Black, age 46) represents a demographic group with elevated model error rates per fairness audit.</em></div>
+  </div>
+
+  <!-- ═══════════════ SECTION 8: METHODOLOGY ═══════════════ -->
+  <div class="section-box">
+    
+    <h2 style="font-family:Arial,sans-serif;color:#0D1F3C;font-size:18px;
+               border-bottom:3px solid #0D1F3C;padding-bottom:6px;margin-top:36px;">Section 8 · Methodology & Robustness Threshold Legend</h2>
+    <ul style="font-size:13px;color:#374151;line-height:1.8;">
+      <li><strong>Dataset:</strong> CMS DE-SynPUF Inpatient Claims + Beneficiary Summary,
+          joined on DESYNPUF_ID. Engineered denial target: logit model over utilization,
+          chronic conditions, age, demographic weights + noise (σ=1.2) → ~20% base rate.</li>
+      <li><strong>Target rationale:</strong> CLM_PMT_AMT==0 proxy removed — it caused
+          target leakage (AUC=1.0). Engineered target reflects realistic prior auth
+          denial patterns per CMS/NAIC literature.</li>
+      <li><strong>Model:</strong> logistic with class_weight="balanced".
+          claim_amount excluded from features (was leaking into target).</li>
+      <li><strong>Fairness tests:</strong> scipy chi-square on each sensitive feature.
+          Findings only flagged if p &lt; 0.05 AND |DPD| ≥ 0.05. HIGH minimum if |DPD| ≥ 0.10.</li>
+      <li><strong>Robustness thresholds:</strong>
+          🟢 Safe &lt;5% F1 decay &nbsp;|&nbsp;
+          🟡 Warning 5–10% &nbsp;|&nbsp;
+          🟠 High 10–20% &nbsp;|&nbsp;
+          🔴 Danger &gt;20% F1 decay.</li>
+      <li><strong>NIST AI RMF:</strong> Voluntary framework (not Radinate-proprietary).
+          Mappings based on NIST AI RMF v1.0 published guidance.</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <div style="background:#0D1F3C;color:#A8D8EA;padding:16px 24px;border-radius:0 0 8px 8px;
+              font-size:11px;text-align:center;margin-top:8px;">
+    PayorLens AI Governance Evaluation Harness · Architecture v2.0 · Generated 2026-04-20 17:36 ·
+    NIST AI RMF aligned · Dataset: CMS DE-SynPUF (public, zero PHI) ·
+    This report is an independent evaluation artefact. It is not a state compliance document.
+  </div>
+
+</div>
+</body>
+</html>
