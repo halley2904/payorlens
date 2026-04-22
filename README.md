@@ -2,7 +2,7 @@
 
 **AI governance evaluation harness for clinical decision models in insurance workflows.**
 
-Health insurers are deploying AI in prior authorization and claims adjudication. Most teams can run a fairness notebook. Almost none can explain what a DPD of 0.286 across race cohorts means for their regulatory exposure, or what a Brier score of 0.236 means for their CMS-0057-F explainability obligations.
+Health insurers are deploying AI in prior authorization and claims adjudication. Fairness metrics are widely generated, but their regulatory and explainability implications require deeper interpretation.
 
 PayorLens bridges the gap between raw evaluation metrics and the business consequence — producing a two-audience governance report that a compliance officer and an ML engineer can both act on.
 
