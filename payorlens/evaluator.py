@@ -28,9 +28,7 @@ import joblib
 
 logger = logging.getLogger("PayorLens.Evaluator")
 
-# ── Feature definition ────────────────────────────────────────────────────────
-# claim_amount EXCLUDED: it was the denial_status proxy in v1 (CLM_PMT_AMT==0),
-# keeping it in features caused target leakage → AUC=1.0. Removed permanently.
+
 NUMERIC_FEATURES = [
     "age", "utilization_days", "deductible_amount", "chronic_count",
     "has_diabetes", "has_chf", "has_copd", "has_cancer",
@@ -72,7 +70,6 @@ def build_models(preprocessor: ColumnTransformer) -> dict:
     }
 
 
-# ── EvalEngine ────────────────────────────────────────────────────────────────
 class EvalEngine:
 
     def __init__(self, output_dir: str = "D:/payorlens/data/processed"):
@@ -95,15 +92,14 @@ class EvalEngine:
         preprocessor = build_preprocessor()
         model_specs   = build_models(preprocessor)
 
-        # Pre-compute balanced sample weights for GBM
-        # (GradientBoosting has no class_weight param — must pass sample_weight)
+        
         from sklearn.utils.class_weight import compute_sample_weight
         balanced_sw = compute_sample_weight("balanced", y_train)
 
         for name, pipeline in model_specs.items():
             logger.info(f"Training {name} …")
             if name == "gbm":
-                # Pass sample_weight through Pipeline: key = "model__sample_weight"
+                
                 pipeline.fit(X_train, y_train, model__sample_weight=balanced_sw)
             else:
                 pipeline.fit(X_train, y_train)
@@ -117,14 +113,14 @@ class EvalEngine:
             logger.info(f"{name}  F1={metrics['f1']:.3f}  AUC={metrics['roc_auc']:.3f}  "
                         f"Brier={metrics['brier_score']:.3f}")
 
-        # Save models + charts
+        
         self._save_models()
         self._plot_roc(y_test)
         self._plot_calibration(y_test)
 
         return self.results
 
-    # ── metrics ───────────────────────────────────────────────────────────────
+    
     def _compute_metrics(self, y_true, y_pred, y_prob, name: str) -> dict:
         frac_pos, mean_pred = calibration_curve(y_true, y_prob, n_bins=10)
         cm = confusion_matrix(y_true, y_pred)
@@ -160,14 +156,14 @@ class EvalEngine:
         rate  = count / max(len(y_true), 1)
         return {"count": count, "rate": rate}
 
-    # ── persistence ───────────────────────────────────────────────────────────
+    
     def _save_models(self):
         for name, model in self.models.items():
             path = self.output_dir / f"model_{name}.pkl"
             joblib.dump(model, path)
             logger.info(f"Model saved → {path}")
 
-    # ── charts ────────────────────────────────────────────────────────────────
+    
     def _plot_roc(self, y_test):
         fig, ax = plt.subplots(figsize=(7, 5))
         colors = {"logistic": "#0A7EA4", "gbm": "#C8932A"}
@@ -204,7 +200,7 @@ class EvalEngine:
         logger.info(f"Calibration chart → {path}")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     PARQUET = "D:/payorlens/data/processed/claims_v1.parquet"
@@ -213,7 +209,7 @@ if __name__ == "__main__":
     engine  = EvalEngine(output_dir=OUT_DIR)
     results = engine.train_and_evaluate(PARQUET)
 
-    print("\n--- Day 3 & 4 Milestone: Model Evaluation Complete ---")
+    print("\n Model Evaluation Complete")
     for name, r in results.items():
         print(f"\n[{name.upper()}]")
         print(f"  Accuracy        : {r['accuracy']:.4f}")

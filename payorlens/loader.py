@@ -13,7 +13,6 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger("PayorLens.Loader")
 
-# ── CMS code mappings ────────────────────────────────────────────────────────
 RACE_MAP = {1: "White", 2: "Black", 3: "Other", 5: "Hispanic"}
 SEX_MAP  = {1: "Male",  2: "Female"}
 
@@ -27,7 +26,6 @@ STATE_MAP = {
 }
 
 
-# ── Pydantic schema ───────────────────────────────────────────────────────────
 class ClaimRecord(BaseModel):
     """
     Validated data contract for one inpatient claim record.
@@ -38,7 +36,7 @@ class ClaimRecord(BaseModel):
     beneficiary_id : str
     claim_id       : str
 
-    # Demographics (decoded from CMS integer codes)
+    # Demographics 
     gender         : str          # "Male" | "Female" | "Unknown"
     race           : str          # "White" | "Black" | "Other" | "Hispanic" | "Unknown"
     age_band       : str          # "18-34" | "35-49" | "50-64" | "65+"
@@ -85,7 +83,7 @@ class ClaimRecord(BaseModel):
         return v
 
 
-# ── Normalisation helpers ─────────────────────────────────────────────────────
+
 def _derive_age_band(age: int) -> str:
     if age < 35:   return "18-34"
     if age < 50:   return "35-49"
@@ -94,39 +92,35 @@ def _derive_age_band(age: int) -> str:
 
 
 def _flag(val, true_val=1) -> int:
-    """CMS chronic condition flags: 1=has condition, 2=no condition."""
     return 1 if val == true_val else 0
 
 
 def normalize(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transform raw merged CMS DataFrame into the ClaimRecord-compatible schema.
-    All coercions happen here so Pydantic only does type-validation, not parsing.
-    """
+ 
     out = pd.DataFrame()
 
-    # ── Identifiers (coerce ints → str) ──────────────────────────────────────
+   
     out["beneficiary_id"] = df["DESYNPUF_ID"].astype(str)
     out["claim_id"]       = df["CLM_ID"].astype(str)
 
-    # ── Demographics ──────────────────────────────────────────────────────────
+    
     out["gender"]     = df["BENE_SEX_IDENT_CD"].map(SEX_MAP).fillna("Unknown")
     out["race"]       = df["BENE_RACE_CD"].map(RACE_MAP).fillna("Unknown")
     out["state_code"] = df["SP_STATE_CODE"].map(STATE_MAP).fillna("Unknown")
 
-    # Age from birth date (format YYYYMMDD stored as int)
+    
     birth_year = (pd.to_numeric(df["BENE_BIRTH_DT"], errors="coerce") // 10000).fillna(1940).astype(int)
     claim_year = (pd.to_numeric(df["CLM_FROM_DT"],   errors="coerce") // 10000).fillna(2008).astype(int)
     out["age"]       = (claim_year - birth_year).clip(lower=0, upper=115)
     out["age_band"]  = out["age"].apply(_derive_age_band)
     out["claim_year"] = claim_year
 
-    # ── Clinical ──────────────────────────────────────────────────────────────
+    
     out["icd9_primary"]    = df["ADMTNG_ICD9_DGNS_CD"].where(df["ADMTNG_ICD9_DGNS_CD"].notna(), None)
     out["drg_code"]        = df["CLM_DRG_CD"].astype(str).where(df["CLM_DRG_CD"].notna(), None)
     out["utilization_days"]= pd.to_numeric(df["CLM_UTLZTN_DAY_CNT"], errors="coerce").fillna(0).astype(int)
 
-    # Chronic conditions (1 = has condition in CMS encoding)
+    
     out["has_diabetes"] = df["SP_DIABETES"].apply(_flag)
     out["has_chf"]      = df["SP_CHF"].apply(_flag)
     out["has_copd"]     = df["SP_COPD"].apply(_flag)
@@ -136,17 +130,12 @@ def normalize(df: pd.DataFrame) -> pd.DataFrame:
                     "SP_DEPRESSN","SP_DIABETES","SP_ISCHMCHT","SP_OSTEOPRS","SP_RA_OA","SP_STRKETIA"]
     out["chronic_count"] = df[chronic_cols].apply(lambda row: sum(v == 1 for v in row), axis=1)
 
-    # ── Financial ─────────────────────────────────────────────────────────────
+    
     clm_pmt = pd.to_numeric(df["CLM_PMT_AMT"], errors="coerce").fillna(0.0)
     out["claim_amount"]      = clm_pmt
     out["deductible_amount"] = pd.to_numeric(df["NCH_BENE_IP_DDCTBL_AMT"], errors="coerce").fillna(0.0)
 
-    # ── Target variable: ENGINEERED realistic prior-auth denial proxy ─────────
-    # Intercept tuned to -2.2 → produces ~21% denial rate on CMS DE-SynPUF.
-    # -1.8 (previous) produced 26% → after random.seed shift → 99.9% in some
-    # environments. -2.2 verified empirically on this exact dataset.
-    # Random Bernoulli draw used — NOT prob>0.5 threshold (threshold fails when
-    # mean logit >> 0, which happens with mean age=73.7 and mean chronic=4.94).
+   
     np.random.seed(42)
     _logit = (
         -2.2
@@ -166,7 +155,7 @@ def normalize(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-# ── Main Loader ───────────────────────────────────────────────────────────────
+
 class CMSLoader:
     """
     Joins CMS DE-SynPUF beneficiary + inpatient claims, normalises,
@@ -178,7 +167,7 @@ class CMSLoader:
         self.processed_dir  = processed_dir
         self.validation_errors: list = []
 
-    # ── public API ────────────────────────────────────────────────────────────
+    
     def process(self, beneficiary_file: str, claims_file: str) -> pd.DataFrame:
         df_bene   = self._read(beneficiary_file)
         df_claims = self._read(claims_file)
@@ -198,7 +187,7 @@ class CMSLoader:
         self._report(df_final)
         return df_final
 
-    # ── internals ─────────────────────────────────────────────────────────────
+    
     def _read(self, filename: str) -> pd.DataFrame:
         path = os.path.join(self.raw_dir, filename)
         logger.info(f"Reading {path}")
@@ -245,7 +234,7 @@ class CMSLoader:
         print("="*60 + "\n")
 
 
-# ── CLI entry point ────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     RAW_DIR       = "D:/payorlens/data/raw/cms"
     PROCESSED_DIR = "D:/payorlens/data/processed"

@@ -22,13 +22,13 @@ app = typer.Typer(
     add_completion=False,
 )
 
-# ── Defaults ──────────────────────────────────────────────────────────────────
+
 DEFAULT_RAW_DIR       = "D:/payorlens/data/raw/cms"
 DEFAULT_PROCESSED_DIR = "D:/payorlens/data/processed"
 DEFAULT_REPORTS_DIR   = "D:/payorlens/reports"
 
 
-# ── validate command ──────────────────────────────────────────────────────────
+
 @app.command()
 def validate(
     bene_file  : str = typer.Option(..., help="Beneficiary CSV filename (in raw/cms/)"),
@@ -37,7 +37,6 @@ def validate(
     out_dir    : str = typer.Option(DEFAULT_PROCESSED_DIR, help="Processed output directory"),
 ):
     """
-    Day 1 & 2: Load and validate CMS DE-SynPUF data.
     Runs the loader, normalises, validates with Pydantic, saves parquet.
     """
     from loader import CMSLoader
@@ -49,7 +48,7 @@ def validate(
     typer.echo(f"    Parquet saved : {out_dir}/claims_v1.parquet")
 
 
-# ── evaluate command ──────────────────────────────────────────────────────────
+
 @app.command()
 def evaluate(
     bene_file  : Optional[str] = typer.Option(None,  help="Beneficiary CSV filename"),
@@ -70,7 +69,7 @@ def evaluate(
     import pandas as pd
     from sklearn.model_selection import train_test_split
 
-    # ── Step 1: Data ──────────────────────────────────────────────────────────
+    
     parquet_path = parquet or f"{proc_dir}/claims_v1.parquet"
 
     if not Path(parquet_path).exists():
@@ -96,8 +95,7 @@ def evaluate(
         df = df.sample(samples, random_state=42)
         typer.echo(f" Sampled {samples:,} rows for evaluation")
 
-    # ── Step 2: Train & Evaluate ──────────────────────────────────────────────
-    # claim_amount removed — was leaking into denial_status target (AUC=1.0 bug)
+    
     NUMERIC_FEATURES     = ["age","utilization_days","deductible_amount","chronic_count",
                              "has_diabetes","has_chf","has_copd","has_cancer"]
     CATEGORICAL_FEATURES = ["gender","race","age_band","state_code"]
@@ -108,7 +106,7 @@ def evaluate(
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=42, stratify=y
     )
-    # keep full df rows aligned with X_test for narrative extraction
+    
     df_test = df.loc[X_test.index].copy()
 
     typer.echo(f"\n Training {model} model …")
@@ -117,7 +115,6 @@ def evaluate(
     eval_results = engine.train_and_evaluate(parquet_path)
     trained_model = engine.models[model]
 
-    # ── Step 3: Fairness audit ────────────────────────────────────────────────
     typer.echo(f"\n Running fairness audit …")
     from fairness import FairnessAuditor
     y_pred = trained_model.predict(X_test)
@@ -125,13 +122,12 @@ def evaluate(
     fairness_results_raw = auditor.audit(y_test, y_pred, X_test, model)
     auditor.generate_all_cohort_charts(model)
 
-    # ── Step 4: Robustness ────────────────────────────────────────────────────
     typer.echo(f"\n  Running robustness stress tests …")
     from robustness import RobustnessEvaluator
     rob_evaluator  = RobustnessEvaluator(output_dir=proc_dir)
     robustness_raw = rob_evaluator.run_all(trained_model, X_test, y_test, model)
 
-    # ── Step 4b: Top-5 failure narratives ────────────────────────────────────
+    
     typer.echo(f"\n Extracting top-5 failure narratives …")
     em_raw = eval_results.get(model, {})
     y_true_list = em_raw.pop("_y_true", list(y_test))
@@ -143,7 +139,7 @@ def evaluate(
     y_pred_arr = _np.array(y_pred_list)
     y_prob_arr = _np.array(y_prob_list)
 
-    # High-confidence wrong: model confident AND wrong
+   
     wrong_mask = y_pred_arr != y_true_arr
     confidence = _np.where(y_pred_arr == 1, y_prob_arr, 1 - y_prob_arr)
     wrong_conf  = confidence * wrong_mask
@@ -189,17 +185,17 @@ def evaluate(
         )
         failure_narratives.append(narrative)
 
-    # ── Step 5: Risk interpretation ───────────────────────────────────────────
+    
     typer.echo(f"\n Interpreting risk findings …")
     from risk_interpreter import RiskInterpreter
     interpreter = RiskInterpreter()
     all_findings = []
 
-    # Data quality
+    
     er = dq["error_count"] / max(dq["total_records"], 1)
     all_findings.append(interpreter.interpret_data_quality(er, dq["total_records"]))
 
-    # Calibration / high-confidence errors
+    
     em = eval_results.get(model, {})
     all_findings.append(interpreter.interpret_calibration(
         em.get("brier_score", 0),
@@ -207,13 +203,13 @@ def evaluate(
         em.get("total_test_samples", 1),
     ))
 
-    # Fairness per feature
+   
     for feature, res in fairness_results_raw.items():
         all_findings.append(interpreter.interpret_dpd(
             res["dpd"], feature, res["chi2_pvalue"], model
         ))
 
-    # Robustness per scenario
+    
     baseline_f1 = robustness_raw.get("baseline_f1", 0)
     for scen_key, scen_res in robustness_raw.get("scenarios", {}).items():
         all_findings.append(interpreter.interpret_robustness(
@@ -225,7 +221,7 @@ def evaluate(
 
     exec_summary = interpreter.generate_executive_summary(all_findings, model)
 
-    # ── Step 6: Report ────────────────────────────────────────────────────────
+    
     typer.echo(f"\n Generating report …")
     from reporter import ReportGenerator, assemble_report_data
 
@@ -251,7 +247,7 @@ def evaluate(
         else:
             typer.echo(" PDF skipped ")
 
-    # ── Summary ───────────────────────────────────────────────────────────────
+    
     typer.echo("\n" + "="*60)
     typer.echo("  PAYORLENS EVALUATION COMPLETE")
     typer.echo("="*60)
@@ -263,6 +259,6 @@ def evaluate(
     typer.echo("="*60)
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     app()

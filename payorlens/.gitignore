@@ -1,0 +1,18 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Database
+*.db
+
+# Reports
+reports/
+
+# Data
+data/
+
+# Streamlit secrets
+.streamlit/secrets.toml

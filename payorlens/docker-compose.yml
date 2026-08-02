@@ -1,0 +1,16 @@
+services:
+  payorlens-api:
+    build: .
+    container_name: payorlens-api
+    ports:
+      - "8000:8000"
+    environment:
+      PAYORLENS_PIPELINE_TIMEOUT: "600"
+    volumes:
+      # Covers raw CMS CSVs (data/raw/cms/), processed parquet+models (data/processed/),
+      # and the SQLite db (data/payorlens_runs.db) in one mount — avoids the earlier
+      # bug of nested mounts shadowing each other.
+      - ./data:/app/data
+      # HTML/PDF governance reports, readable from the host after a run.
+      - ./reports:/app/reports
+    restart: unless-stopped

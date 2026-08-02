@@ -1,18 +1,6 @@
 # payorlens/reporter.py
 """
 PayorLens ReportGenerator
-Day 9–11: Report + Executive Brief + CLI
-Architecture v2.0
-
-Generates a two-audience governance report:
-  Page 1  — Executive Risk Brief  (compliance officer)
-  Pages 2+ — Technical Detail     (ML engineer / auditor)
-
-Output: report.html  (always)
-        report.pdf   (when --pdf flag set, requires weasyprint)
-
-Template is built inline (no external files needed) so the project
-is fully self-contained.
 """
 
 import json
@@ -24,7 +12,7 @@ from typing import Optional
 
 logger = logging.getLogger("PayorLens.Reporter")
 
-# ── Risk colors & icons ───────────────────────────────────────────────────────
+
 RISK_COLORS = {
     "LOW"     : "#1E7A4A",
     "MEDIUM"  : "#C8932A",
@@ -58,7 +46,6 @@ NIST_FUNCTIONS = {
 }
 
 
-# ── HTML template (inline, no Jinja2 dependency) ──────────────────────────────
 def _badge(level: str, text: Optional[str] = None) -> str:
     label = text or level
     color = RISK_COLORS.get(level, "#333")
@@ -138,7 +125,7 @@ def NIST_BG(fn: str) -> str:
     return {"Govern":"#E6EAF2","Map":"#E6F4F9","Measure":"#FDF6E3","Manage":"#E8F8EE"}.get(fn,"#F5F5F5")
 
 
-# ── ReportGenerator ────────────────────────────────────────────────────────────
+
 class ReportGenerator:
 
     def __init__(self, output_dir: str = "D:/payorlens/reports"):
@@ -167,7 +154,7 @@ class ReportGenerator:
             logger.error(f"PDF generation failed: {e}")
             return None
 
-    # ── HTML builder ──────────────────────────────────────────────────────────
+    
     def _build_html(self, d: dict) -> str:
         exec_s   = d.get("executive_summary", {})
         findings = d.get("findings", [])
@@ -185,19 +172,19 @@ class ReportGenerator:
         ts        = meta.get("generated_at", datetime.now().strftime("%Y-%m-%d %H:%M"))
         model_name= meta.get("model_name", "logistic")
 
-        # ── finding blocks ────────────────────────────────────────────────────
+        
         finding_html = "".join(_finding_block(f) for f in findings)
 
-        # ── NIST table ────────────────────────────────────────────────────────
+        
         nist_rows = "".join(_nist_table_row(f) for f in findings)
 
-        # ── fairness cohort tables ────────────────────────────────────────────
+        
         fairness_html = self._build_fairness_section(fair_r, model_name)
 
-        # ── robustness table ──────────────────────────────────────────────────
+        
         robust_html = self._build_robustness_section(robust_r, model_name)
 
-        # ── top findings for exec brief ───────────────────────────────────────
+        
         top_f = exec_s.get("top_findings", [])
         top_f_html = "".join(
             f'<div style="background:#F4F6F8;border-left:4px solid {ov_color};'
@@ -206,7 +193,7 @@ class ReportGenerator:
             for i, txt in enumerate(top_f)
         )
 
-        # ── eval metrics cards ────────────────────────────────────────────────
+       
         best_model = eval_r.get(model_name, {})
         metric_cards = ""
         if best_model:
@@ -409,7 +396,7 @@ class ReportGenerator:
 </html>"""
         return html
 
-    # ── subsection builders ───────────────────────────────────────────────────
+    
     def _build_fairness_section(self, fair_r: dict, model_name: str) -> str:
         if not fair_r:
             return ""
@@ -498,7 +485,7 @@ class ReportGenerator:
         </table>"""
 
 
-# ── helper: assemble report data dict ────────────────────────────────────────
+
 def assemble_report_data(
     eval_results:      dict,
     fairness_results:  dict,

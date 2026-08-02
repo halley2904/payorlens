@@ -1,22 +1,6 @@
 # payorlens/fairness.py
 """
 PayorLens FairnessAuditor
-Day 5 & 6: Fairness Audit + Risk Interpreter
-Architecture v2.0
-
-Uses Fairlearn MetricFrame to compute:
-  - Demographic Parity Difference (DPD) per sensitive feature
-  - Equalized Odds Difference (EOD) per sensitive feature
-  - Per-cohort denial_rate, precision, F1, count
-
-Every metric is backed by scipy chi-square or Mann-Whitney for
-statistical significance. No metric is reported without a p-value.
-
-Sensitive features evaluated on CMS DE-SynPUF:
-  - race        (White / Black / Hispanic / Other)
-  - gender      (Male / Female)
-  - age_band    (18-34 / 35-49 / 50-64 / 65+)
-  - state_code  (2-letter abbreviation)
 """
 
 import logging
@@ -31,16 +15,15 @@ import sklearn.metrics as skm
 
 logger = logging.getLogger("PayorLens.Fairness")
 
-# ── Thresholds (from architecture v2 — backed by NAIC AIR standard) ──────────
 DPD_WARN     = 0.05   # MEDIUM risk
 DPD_HIGH     = 0.10   # HIGH risk
-DPD_CRITICAL = 0.15   # CRITICAL — exceeds NAIC AIR threshold implication
+DPD_CRITICAL = 0.15   # CRITICAL-  exceeds NAIC AIR threshold implication
 PVAL_THRESHOLD = 0.05  # statistical significance gate
 
 SENSITIVE_FEATURES = ["race", "gender", "age_band", "state_code"]
 
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+
 def _safe_f1(y_true, y_pred):
     return skm.f1_score(y_true, y_pred, zero_division=0)
 
@@ -54,13 +37,8 @@ def _count(y_true, y_pred):
     return len(y_true)
 
 
-# ── FairnessAuditor ───────────────────────────────────────────────────────────
 class FairnessAuditor:
-    """
-    Computes per-cohort fairness metrics and statistical significance tests
-    for each sensitive feature. Returns structured results ready for
-    risk_interpreter.py and reporter.py.
-    """
+    
 
     def __init__(self, output_dir: str = "D:/payorlens/data/processed"):
         self.output_dir = Path(output_dir)
@@ -88,7 +66,7 @@ class FairnessAuditor:
         self._plot_dpd_summary(all_results, model_name)
         return all_results
 
-    # ── per-feature audit ─────────────────────────────────────────────────────
+    
     def _audit_feature(self, y_true, y_pred, sensitive_col, feature_name) -> dict:
         groups = sensitive_col.unique()
         by_group = {}
@@ -101,7 +79,7 @@ class FairnessAuditor:
             yp_g    = y_pred[mask]
 
             if len(yt_g) < 10:
-                # Too few samples — flag but skip calculation
+                
                 by_group[str(group)] = {
                     "count": len(yt_g),
                     "denial_rate": None,
@@ -119,12 +97,12 @@ class FairnessAuditor:
                 "true_denial_rate": round(float(np.mean(yt_g)), 4),
             }
 
-        # ── DPD: max denial_rate minus min denial_rate across groups ──────────
+        
         valid_rates = [v["denial_rate"] for v in by_group.values()
                        if v.get("denial_rate") is not None]
         dpd = round(max(valid_rates) - min(valid_rates), 4) if len(valid_rates) >= 2 else 0.0
 
-        # ── EOD: max true positive rate difference ────────────────────────────
+        
         tpr_rates = []
         for group, vals in by_group.items():
             if vals.get("count", 0) < 10:
@@ -137,10 +115,10 @@ class FairnessAuditor:
                 tpr_rates.append(tpr)
         eod = round(max(tpr_rates) - min(tpr_rates), 4) if len(tpr_rates) >= 2 else 0.0
 
-        # ── Chi-square test for independence of denial decision vs group ──────
+        
         chi2_pval = self._chi2_test(y_pred, sensitive_col)
 
-        # ── Risk level (based on DPD + statistical significance) ─────────────
+        
         risk_level = self._risk_level(dpd, chi2_pval)
 
         return {

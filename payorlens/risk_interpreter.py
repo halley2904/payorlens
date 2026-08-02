@@ -1,17 +1,6 @@
 # payorlens/risk_interpreter.py
 """
-PayorLens RiskInterpreter — The 'So What' Layer
-Architecture v2.0
-
-Translates raw metric numbers into:
-  1. Buyer-facing payor risk narrative (what a compliance officer reads)
-  2. NIST AI RMF function + subcategory mapping
-  3. Recommended action
-  4. Risk level: LOW | MEDIUM | HIGH | CRITICAL
-
-This module is the commercial differentiator. No fairness notebook on GitHub
-has this. Every metric output from evaluator.py, fairness.py, and robustness.py
-passes through here before reaching the report.
+PayorLens RiskInterpreter
 """
 
 from dataclasses import dataclass, field
@@ -34,7 +23,6 @@ RISK_BADGES = {
 }
 
 
-# ── NIST AI RMF reference table ───────────────────────────────────────────────
 NIST_MAP = {
     "fairness_dpd"     : ("Measure",  "MS-2.5",  "Bias and fairness testing across demographic cohorts"),
     "fairness_eod"     : ("Measure",  "MS-2.5",  "Equalized odds and error rate disparity"),
@@ -45,8 +33,6 @@ NIST_MAP = {
     "overall"          : ("Govern",   "GV-1.1",  "Organisational AI risk tolerance and governance posture"),
 }
 
-
-# ── Data structures ────────────────────────────────────────────────────────────
 @dataclass
 class RiskFinding:
     metric_name         : str
@@ -80,10 +66,9 @@ class ExecutiveSummary:
     dataset_description : str = "CMS DE-SynPUF Inpatient Claims"
 
 
-# ── RiskInterpreter ────────────────────────────────────────────────────────────
 class RiskInterpreter:
 
-    # ── DPD (Demographic Parity Difference) ───────────────────────────────────
+    
     def interpret_dpd(self, dpd: float, feature: str,
                       p_value: float, model_name: str) -> RiskFinding:
         nist = NIST_MAP["fairness_dpd"]
@@ -137,7 +122,7 @@ class RiskInterpreter:
             statistical_note=f"chi-square p-value={p_value:.4f}, significant={sig}"
         )
 
-    # ── Calibration / Brier score ─────────────────────────────────────────────
+   
     def interpret_calibration(self, brier_score: float, high_conf_wrong: int,
                                total_samples: int) -> RiskFinding:
         nist = NIST_MAP["calibration"]
@@ -182,7 +167,7 @@ class RiskInterpreter:
             statistical_note=f"High-confidence errors (>85% conf, wrong): {high_conf_wrong}/{total_samples}"
         )
 
-    # ── Robustness degradation ────────────────────────────────────────────────
+    
     def interpret_robustness(self, scenario_name: str, baseline_f1: float,
                               degraded_f1: float, null_rate: float) -> RiskFinding:
         nist      = NIST_MAP["robustness"]
@@ -235,7 +220,7 @@ class RiskInterpreter:
             )
         )
 
-    # ── Data quality ──────────────────────────────────────────────────────────
+    
     def interpret_data_quality(self, error_rate: float, total_records: int) -> RiskFinding:
         nist = NIST_MAP["data_quality"]
         if error_rate < 0.01:
@@ -263,7 +248,7 @@ class RiskInterpreter:
             statistical_note=f"Total records evaluated: {total_records:,}"
         )
 
-    # ── Executive summary ─────────────────────────────────────────────────────
+    
     def generate_executive_summary(self, findings: List[RiskFinding],
                                     model_name: str) -> ExecutiveSummary:
         critical = [f for f in findings if f.risk_level == "CRITICAL"]
