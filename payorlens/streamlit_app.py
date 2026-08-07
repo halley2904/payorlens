@@ -146,9 +146,12 @@ st.sidebar.caption("AI Governance & Audit Suite")
 with st.sidebar.expander("⚙️ API Configuration", expanded=False):
 
     try:
-        secret_api_url = st.secrets.get("PAYORLENS_API_URL", "http://localhost:8000")
+        secret_api_url = st.secrets.get(
+        "PAYORLENS_API_URL",
+        "https://payorlens.onrender.com"
+    )
     except Exception:
-        secret_api_url = "http://localhost:8000"
+        secret_api_url = "https://payorlens.onrender.com"
 
     default_api_url = st.session_state.get("api_base_url", secret_api_url)
     api_base_url = st.text_input(
