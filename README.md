@@ -1,171 +1,389 @@
-# PayorLens
+PayorLens
 
-**AI governance evaluation harness for clinical decision models in insurance workflows**
+Enterprise AI Governance & Audit Harness for Clinical Claims Models
 
-🔗 **Live dashboard**: _add your Streamlit Cloud URL here_
-🔗 **API docs (Swagger)**: _add your AWS URL + `/docs` here_
-📄 **Sample report**: [halley2904.github.io/payorlens](https://halley2904.github.io/payorlens/)
+🔗 Interactive Dashboard: payorlens.streamlit.app
 
----
+🔗 API Documentation (Swagger): payorlens.onrender.com/docs
 
-## 1. Problem Statement
+📄 Sample Executive Governance Report: halley2904.github.io/payorlens
 
-Health insurers are deploying AI in prior authorization and claims adjudication and decisions that directly affect whether a patient gets covered care. There is a gap consistently show up in practice:
+Note on Live Demos: Both the API backend (Render) and frontend (Streamlit Cloud) run on free-tier infrastructure. If idle, the backend service spins down automatically. Initial requests may take 30–60 seconds to wake up from a cold start.
 
-1. **Metrics don't translate into consequence.** A technical person sees `DPD = 0.286, p < 0.0001` and knows it's bad. A compliance officer, legal counsel, or a product manager approving a launch does not  and they're the ones who actually decide whether the model ships. The Cigna PxDx litigation and NAIC's Algorithmic Information Request framework both center on exactly this: not just "was the model biased," but "did the organization know, document, and act on it."
+1. Product Overview & Strategic Context
 
-**PayorLens addresses it.** The core evaluation harness (`loader.py` → `evaluator.py` → `fairness.py` → `robustness.py` → `risk_interpreter.py` → `reporter.py`) produces a two-audience governance report readable by a compliance officer, actionable . On top of that, a FastAPI service and Streamlit dashboard make it a callable, persisted, non-technical-user-triggerable tool.
+Who Is This For?
 
-## 2. System Overview
+Chief Risk & Compliance Officers: Needing clear audit trails, legal defensibility, and NIST-aligned risk verdicts before approving AI model deployments in claims workflows.
 
-```
-                    ┌─────────────────────┐
-   Dashboard  ────► │   FastAPI service    │ ────► SQLite (run history,
- (Streamlit Cloud)   │  (payorlens_api.py)  │        structured metrics)
-                    └──────────┬───────────┘
-                               │ in-process calls
-                               ▼
-              loader → evaluator → fairness → robustness
-                     → risk_interpreter → reporter
-                               │
-                               ▼
-                    LLM narrator (narrator.py)
-              guardrailed plain-English risk summary
-```
+Clinical AI Product Managers: Responsible for ensuring model behavior aligns with clinical policy, operational reliability, and patient equity targets.
 
-| Component | Responsibility | Tech |
-|---|---|---|
-| Evaluation core | Data validation, model training, fairness audit, robustness stress test, NIST-mapped risk interpretation, HTML/PDF report generation | scikit-learn, Fairlearn, scipy, Pydantic v2, Jinja2 |
-| API service | Wraps the evaluation core as `POST /evaluate`, `GET /runs`, `GET /runs/{id}`, `GET /runs/{id}/report`; persists run history | FastAPI, SQLite |
-| LLM narrator | Turns structured metrics into a plain-English summary for non-technical stakeholders, with a hard guardrail against fabricated numbers | Anthropic/Gemini API |
-| Dashboard | Interactive, non-technical trigger + visualization layer over the API | Streamlit, Plotly |
+ML Engineers & Data Scientists: Looking to move beyond offline F1 scores and evaluate models against real-world clinical failure modes, cohort disparities, and schema drift.
 
-## 3. What It Evaluates
+The Problem (Why)
 
-1. **Data quality** — Pydantic v2 schema validation with field-level type coercion. Pass/fail data contract before any model evaluation begins.
-2. **Model performance** — Accuracy, F1, ROC-AUC, Brier score, confusion matrix. Flags high-confidence wrong predictions (>85% confidence, wrong outcome) — the specific failure mode cited in the Cigna PxDx litigation.
-3. **Fairness audit** — Demographic Parity Difference (DPD) and Equalized Odds Difference (EOD) across race, gender, age band, geography. Every disparity is backed by a chi-square significance test — nothing is flagged unless it clears both effect-size and significance thresholds.
-4. **Robustness stress test** — Five clinically meaningful failure injections (not random noise): ICD9 code corruption, missing prior-auth fields, age-band enrollment lag, high-cost outlier claims, combined multi-field degradation.
-5. **Risk interpretation** — Maps every finding to NIST AI RMF functions (Govern/Map/Measure/Manage), assigns a risk level, writes a plain-English payer interpretation, and generates a recommended action.
+Health plans are increasingly automating prior authorization and claims adjudication using AI models. However, a major disconnect exists between model development and executive risk approval:
 
-## 4. Sample Findings
+Metrics don't communicate operational or legal risk. A data scientist sees a Demographic Parity Difference (DPD) of 0.286 or a p-value $< 0.0001$ and recognizes a statistical anomaly. A compliance officer or legal counsel needs to know: Does this violate CMS fair practice rules? Will this trigger regulatory action or litigation?
 
-_Evaluated on CMS DE-SynPUF inpatient claims (66,718 records) · Logistic Regression baseline_
+Regulatory & Litigation Pressure. High-profile class-action lawsuits (e.g., Cigna PxDx litigation) and regulatory frameworks (NAIC Algorithmic Information Request, CMS-4201-F) prioritize organizational governance: Did the health plan detect, document, and remediate systemic bias and automated denial patterns before shipping?
 
-| Finding | Metric | Risk Level |
-|---|---|---|
-| Model calibration failure | Brier = 0.236 · 8 high-confidence wrong predictions | 🔴 CRITICAL |
-| Race cohort denial disparity | DPD = 0.286 · p < 0.0001 | 🔴 CRITICAL |
-| Age band denial disparity | DPD = 0.446 · p < 0.0001 | 🔴 CRITICAL |
-| Geographic disparity | DPD = 0.550 across states · p < 0.0001 | 🔴 CRITICAL |
-| Gender disparity | DPD = 0.054 · p < 0.0001 | 🟡 MEDIUM |
-| ICD9 code corruption robustness | F1 decay 7.7% at 20% corruption | 🟡 MEDIUM |
-| Multi-field degradation | F1 decay 6.5% under combined failure | 🟡 MEDIUM |
+The Solution & Impact (What)
 
-**Overall governance verdict: RED — DO NOT DEPLOY without remediation.**
+PayorLens is an end-to-end evaluation and governance harness that sits between clinical model outputs and production deployment. It ingests model inference data, executes automated fairness and clinical stress tests, translates statistical outputs into plain-English risk narratives, and generates a two-audience governance report.
 
-## 5. Design Decisions & Tradeoffs
+De-risks AI Deployment: Automatically flags high-confidence incorrect denial decisions (a primary driver of bad-faith denial lawsuits).
+
+Bridges Tech & Legal: Maps raw statistical metrics directly to NIST AI RMF functions (Govern, Map, Measure, Manage) with automated risk determinations.
+
+Enforces Hard Data Contracts: Prevents pipeline corruption by validating input schemas using strict Pydantic rules prior to evaluation.
+
+2. System Architecture
+
+                      ┌────────────────────────────────────────┐
+                      │    Streamlit Dashboard (Frontend)      │
+                      │       payorlens.streamlit.app          │
+                      └──────────────────┬─────────────────────┘
+                                         │ REST API
+                                         ▼
+                      ┌────────────────────────────────────────┐
+                      │      FastAPI Service (Render)          │ ──► SQLite (Run History &
+                      │       payorlens.onrender.com           │      Structured Metrics)
+                      └──────────────────┬─────────────────────┘
+                                         │ In-Process Pipeline Call
+                                         ▼
+ ┌────────────────────────────────────────────────────────────────────────────────────────┐
+ │ Evaluation Core                                                                        │
+ │  [Data Loader] ──► [Model Evaluator] ──► [Fairness Audit] ──► [Clinical Stress Test]   │
+ │         │                                                             │                │
+ │         └─────────────────────────────┬───────────────────────────────┘                │
+ │                                       ▼                                                │
+ │                           [NIST Risk Interpreter]                                      │
+ └───────────────────────────────────────┬────────────────────────────────────────────────┘
+                                         │
+                                         ▼
+                             [Guardrailed LLM Narrator]
+                      (Translates metrics into plain-English)
+                                         │
+                                         ▼
+                         [HTML / PDF Audit Report Output]
 
 
-| Decision | What I chose | Why | What I gave up |
-|---|---|---|---|
-| Pipeline execution model | Run the evaluation pipeline **in-process** inside the API request handler, not as a subprocess calling `cli.py` | A subprocess-based version hid real errors behind opaque exit codes and was fragile across OS/path differences. In-process gives full tracebacks and direct access to structured metrics objects | Process isolation - because a crashing evaluation could theoretically affect the API process.|
-| Persistence | SQLite, single file, no ORM | Zero operational overhead for a single-instance, low-write-volume service. Migrating to Postgres later is a one-line change, nothing to rewrite | Concurrent-writer safety. First thing I'd change if this needed to serve multiple simultaneous evaluators |
-| Request handling | Synchronous `POST /evaluate` (blocks until the run finishes) | The dataset is small and fixed; a run takes seconds to low minutes. Adding a job queue for a workload this size would be infrastructure nobody's using yet | Won't handle concurrent long-running requests gracefully so  a background task queue (Celery/RQ) the moment concurrent usage is real in future |
-| Deployment | Direct Python deploy, not Docker | Docker added real debugging overhead for zero benefit at single-instance scale. Docker artifacts are kept in the repo for future portability, just not on the deploy path today | Docker would provide environment parity |
-| LLM narrative layer | The narrator can only use numbers present in the input metrics and any output containing a number that isn't in the source metrics is discarded and replaced with a deterministic fallback | A governance tool cannot afford a hallucinated compliance statistic. Trustworthiness of the number matters more than narrative richness | Some runs get a plainer, template-based summary instead of a fuller LLM narrative. Correct tradeoff for this domain |
-| Public API dataset | Fixed CMS sample dataset, no arbitrary file upload endpoint | Keeps the public demo API fast, stateless-ish, and safe from unbounded upload abuse on a free-tier server | Not usable against a client's actual data as-is.|
-| Dashboard framework | Streamlit, not a custom frontend | Standard tool for exposing a Python/AI backend without frontend engineering scope | Less visual polish/control than a custom frontend.|
+Component
 
-## 6. What I'd Change With More Resources
+Responsibility
 
-1. **Model/run comparison endpoint** (`GET /runs/compare?a=&b=`): version of drift detection: diff two runs' metrics, flag regressions
-2. **Postgres + a background job queue** —  to handle more than one evaluator at a time.
-3. **Real data ingestion** — Replacing the fixed sample dataset, so this could run against an actual client's claims data.
-4. **CI/CD** - GitHub Actions auto-deploy on push to main
-6. **Multi-tenant auth** —  if this was for evaluating multiple payers' models under one deployment
+Technical Stack
 
-## 7. Report Structure
+Evaluation Core
 
-| Section | Audience | Contents |
-|---|---|---|
-| 0 · Executive Risk Brief | Compliance officer | Overall risk score, top 3 findings, single recommendation |
-| 1 · NIST AI RMF Map | Legal / risk officer | Every metric → NIST function → PASS/WARN/FAIL |
-| 2 · Data Quality | Data engineer | Pydantic validation results, error rate |
-| 3 · Model Performance | ML engineer | F1, AUC, Brier, calibration diagram |
-| 4–5 · Fairness Audit | Compliance + ML | Per-cohort DPD/EOD with p-values and risk narratives |
-| 6 · Robustness | ML + compliance | F1 decay per clinical scenario, danger threshold |
-| 7 · Failure Narratives | Compliance officer | Top 5 high-confidence errors as plain-language vignettes |
-| 8 · Methodology | Auditor | Dataset provenance, statistical test rationale |
+Schema validation, performance auditing, fairness quantification, stress testing, NIST mapping, and HTML report rendering
 
-## 8. Stack
+scikit-learn, Fairlearn, scipy, Pydantic v2, Jinja2
 
-```
-Python 3.11+
-scikit-learn        — model training and evaluation pipelines
-fairlearn           — MetricFrame for per-cohort fairness metrics
-scipy.stats         — chi2_contingency for all significance tests
-pydantic v2         — schema validation and data contracts
-pandas / numpy      — data wrangling
-matplotlib          — charts (ROC curve, calibration, fairness bar charts)
-joblib              — model serialization
-typer               — CLI interface
-fastapi / uvicorn   — API service layer
-streamlit / plotly  — interactive dashboard
-anthropic / gemini  — LLM narrator with guardrailed output
-```
+API Backend
 
-## 9. Quick Start
+Wraps the core pipeline as REST endpoints (POST /evaluate, GET /runs, GET /runs/{id}); manages run persistence
 
-```bash
-# 1. Install dependencies
+FastAPI, Uvicorn, SQLite
+
+LLM Narrator
+
+Converts structured evaluation metrics into plain-English risk summaries for non-technical stakeholders using strict numerical guardrails
+
+Anthropic Claude API / Google Gemini API
+
+User Dashboard
+
+Interactive interface allowing non-technical users to trigger evaluation runs, inspect cohort metrics, and view generated reports
+
+Streamlit, Plotly
+
+3. What PayorLens Evaluates
+
+Data Contract Integrity
+
+Field-level Pydantic validation and type coercion. Rejects corrupt or incomplete claims payloads before running downstream metrics.
+
+Clinical Performance & High-Confidence Failures
+
+Tracks standard metrics (F1, ROC-AUC, Brier score). Crucially flags high-confidence wrong predictions ($>85\%$ confidence score on incorrect denials), isolating the specific failure pattern behind automated claims lawsuits.
+
+Protected Cohort Fairness Audit
+
+Evaluates Demographic Parity Difference (DPD) and Equalized Odds Difference (EOD) across protected attributes (race, gender, age band, geography). Every flagged disparity requires both an effect-size threshold breach and a statistically significant chi-square test ($p < 0.05$).
+
+Clinical Failure Injections (Robustness)
+
+Subject models to 5 real-world edge cases rather than random gaussian noise:
+
+ICD-9 code corruption
+
+Missing prior-authorization details
+
+Age-band enrollment lag
+
+High-cost outlier claims
+
+Multi-field combined degradation
+
+NIST AI RMF Risk Mapping
+
+Automatically categorizes findings into NIST functions (Govern, Map, Measure, Manage), determines overall risk levels (Low, Medium, High, Critical), and generates action items for executive review.
+
+4. Sample Evaluation Findings
+
+Based on CMS DE-SynPUF inpatient claims (66,718 records) evaluated on a Logistic Regression baseline.
+
+Audit Finding
+
+Underlying Metric
+
+Risk Level
+
+Governance Verdict
+
+Model Calibration Failure
+
+Brier Score = 0.236 · 8 high-confidence wrong decisions
+
+🔴 CRITICAL
+
+Model overconfident on bad predictions
+
+Race Cohort Disparity
+
+DPD = 0.286 ($p < 0.0001$)
+
+🔴 CRITICAL
+
+Unacceptable bias in denial distribution
+
+Age Band Disparity
+
+DPD = 0.446 ($p < 0.0001$)
+
+🔴 CRITICAL
+
+Older age bands disproportionately denied
+
+Geographic Disparity
+
+DPD = 0.550 across state cohorts ($p < 0.0001$)
+
+🔴 CRITICAL
+
+Regional variance in model decisions
+
+Gender Disparity
+
+DPD = 0.054 ($p < 0.0001$)
+
+🟡 MEDIUM
+
+Moderate disparity requiring monitoring
+
+ICD-9 Corruption Robustness
+
+F1 decay of 7.7% under 20% data corruption
+
+🟡 MEDIUM
+
+Model degraded by input field formatting
+
+Multi-Field Degradation
+
+F1 decay of 6.5% under combined failure injection
+
+🟡 MEDIUM
+
+System performance degrades under partial data
+
+Overall Executive Verdict: 🔴 RED — DO NOT DEPLOY WITHOUT REMEDIATION
+
+5. Key Architecture & PM Tradeoffs
+
+Strategic Decision
+
+Choice Made
+
+PM Rationale
+
+Tradeoff / Limitation
+
+Pipeline Execution
+
+In-process execution inside the API handler
+
+Prevents opaque subprocess exit codes; provides full tracebacks and direct metric access for real-time risk assessment
+
+Lack of process isolation (a crashing evaluation can impact API availability)
+
+Data Persistence
+
+SQLite file database
+
+Zero operational overhead for single-instance demo; rapid prototyping
+
+Limited concurrent write capability
+
+Request Model
+
+Synchronous POST /evaluate endpoint
+
+Dataset is fixed and evaluation takes seconds; avoids unneeded queue infrastructure for single-instance workloads
+
+Cannot gracefully handle concurrent long-running requests without a background queue (e.g., Celery)
+
+Deployment Setup
+
+Native Python host (Render & Streamlit Cloud)
+
+Direct deployment eliminates Docker overhead for demo scale
+
+Requires manual environment alignment across cloud hosts
+
+LLM Guardrails
+
+Deterministic strict numeric verification
+
+Prevents hallucinated metrics in compliance documents; rejects summaries containing numbers not present in raw metrics
+
+Narratives can fallback to template text if the LLM output violates guardrails
+
+Public API Scope
+
+Fixed CMS sample dataset
+
+Ensures fast, deterministic evaluation runs and prevents arbitrary file upload exploits on free-tier servers
+
+Users cannot upload arbitrary custom datasets via the live public web demo
+
+6. Report Structure
+
+PayorLens renders a unified HTML/PDF report structured specifically to balance compliance overview with technical depth:
+
+Section
+
+Target Audience
+
+Key Contents
+
+0. Executive Risk Brief
+
+Chief Compliance Officer, Legal
+
+Overall risk color (Red/Yellow/Green), top critical findings, deployment approval recommendation
+
+1. NIST AI RMF Mapping
+
+Risk Officer, Auditor
+
+Finding-to-NIST mapping (Govern, Map, Measure, Manage) with pass/fail indicators
+
+2. Data Quality & Schema
+
+Data Engineer, ML Engineer
+
+Pydantic validation status, missing field ratios, schema contract health
+
+3. Model Performance
+
+ML Engineer
+
+ROC-AUC, F1-score, Brier calibration score, high-confidence error counts
+
+4–5. Fairness & Equity Audit
+
+Compliance Officer, ML Engineer
+
+Cohort-level DPD/EOD metrics, chi-square significance values, plain-language risk commentary
+
+6. Clinical Robustness
+
+ML Engineer, Clinical PM
+
+Performance decay curves across 5 failure scenario injections
+
+7. Failure Case Vignettes
+
+Compliance Officer, Product Manager
+
+Concrete plain-language vignettes of top high-confidence wrong decisions
+
+8. Methodology & Provenance
+
+External Auditor
+
+Data sources, statistical assumptions, reproducible evaluation configuration
+
+7. Future Roadmap
+
+Automated Drift & Version Comparison (GET /runs/compare): Diff two separate evaluation runs to highlight metric regressions or fairness drift over time.
+
+Background Task Queue & Scalable Storage: Integrate Celery/Redis with PostgreSQL to handle multi-tenant concurrent evaluations.
+
+Custom Ingestion Pipelines: Support dynamic S3/GCS file uploads with user-configurable schema mappers for private payer datasets.
+
+Role-Based Access Control (RBAC): Multi-tenant auth ensuring clinical teams, auditors, and engineering groups maintain appropriate data visibility.
+
+8. Technical Stack & Local Setup
+
+Core Stack
+
+Python: 3.11+
+
+ML & Statistics: scikit-learn, fairlearn, scipy, pandas, numpy
+
+Validation & API: pydantic v2, fastapi, uvicorn
+
+Visualization & Frontend: streamlit, plotly, matplotlib
+
+LLM Layer: anthropic / google-generativeai
+
+Quick Start (Local Development)
+
+Bash
+
+# 1. Clone repo and install dependencies
+git clone https://github.com/halley2904/payorlens.git
+cd payorlens
 pip install -r requirements.txt
 
-# 2. Placing CMS DE-SynPUF files in data/raw/cms/
-#    Beneficiary Summary + Inpatient Claims (Sample 1)
-#    can get it for free by registring: cms.gov/Research-Statistics-Data-and-Systems
+# 2. Place CMS DE-SynPUF dataset files in data/raw/cms/
+#    (Beneficiary Summary + Inpatient Claims files)
 
-# 3a. Run via CLI directly
+# 3a. Option A: Run via CLI directly
 python cli.py evaluate \
   --bene-file DE1_0_2008_Beneficiary_Summary_File_Sample_1.csv \
   --claims-file DE1_0_2008_to_2010_Inpatient_Claims_Sample_1.csv \
   --model logistic
 
-# 3b. OR run via the API
+# 3b. Option B: Run the local API backend
 uvicorn payorlens_api:app --reload
-curl -X POST localhost:8000/evaluate -H "Content-Type: application/json" -d '{"model":"logistic"}'
+# Submit evaluation request:
+curl -X POST http://localhost:8000/evaluate -H "Content-Type: application/json" -d '{"model":"logistic"}'
 
-# 3c. OR run the dashboard (needs the API running)
+# 3c. Option C: Run the interactive dashboard (requires running API)
 pip install -r requirements-streamlit.txt
 streamlit run streamlit_app.py
-```
 
-## 10. Project Structure
 
-```
+Directory Layout
+
 payorlens/
-├── loader.py                  # CMS data ingestion, normalization, Pydantic validation
-├── evaluator.py                # Model training + core performance metrics
-├── fairness.py                 # FairnessAuditor - DPD/EOD with chi-square significance
-├── robustness.py                # ClinicalRobustnessInjector - 5 failure scenarios
-├── risk_interpreter.py         # RiskInterpreter - metrics -> risk narratives + NIST mapping
-├── reporter.py                  # ReportGenerator - two-audience HTML/PDF output
-├── cli.py                       # Typer CLI entry point
-├── payorlens_api.py             # FastAPI service wrapping the pipeline
-├── narrator.py                  # Guardrailed LLM narrative layer
-├── streamlit_app.py             # Interactive dashboard client
-├── requirements.txt              # Pipeline + API dependencies
-├── requirements-streamlit.txt    # Dashboard-only dependencies
-data/
-├── raw/cms/                     # CMS DE-SynPUF source files 
-├── processed/                   # Parquet, trained models, charts
-reports/
-├── payorlens_logistic.html      # Sample report — logistic regression
-├── payorlens_gbm.html           # Sample report — gradient boosting
-```
+├── loader.py              # Ingestion, schema normalization, Pydantic validation
+├── evaluator.py           # Model training & standard metric calculations
+├── fairness.py            # Cohort fairness auditor (DPD/EOD + Chi-square tests)
+├── robustness.py          # Clinical robustness stress-testing scenarios
+├── risk_interpreter.py    # Risk interpretation & NIST AI RMF mapping engine
+├── reporter.py            # HTML/PDF dual-audience report generator
+├── narrator.py            # Guardrailed LLM plain-English summary layer
+├── payorlens_api.py       # FastAPI REST service & persistence layer
+├── streamlit_app.py       # Streamlit interactive dashboard UI
+├── cli.py                 # Command-line interface entry point
+├── data/                  # Raw and processed dataset files
+└── reports/               # Generated HTML governance reports
 
 
-
-Built as an independent portfolio project demonstrating AI governance methodology for payer AI use cases, extended into a deployable API + dashboard to demonstrate applied AI engineering and solutions/product thinking, not just modeling. Not affiliated with any payer, EHR vendor, or AI company.
-
-NIST AI RMF is a product of the National Institute of Standards and Technology. CMS DE-SynPUF is a public dataset from the Centers for Medicare & Medicaid Services.
+PayorLens was developed as an independent portfolio project demonstrating applied AI PM thinking, software engineering, and AI governance methodology for healthcare payer workflows. It is not affiliated with any specific insurance payer, EHR vendor, or cloud provider.
